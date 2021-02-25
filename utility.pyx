@@ -171,6 +171,10 @@ cdef class Algorithm:
             ret.append((report.gen, report.fitness, report.time))
         return ret
 
+    cpdef tuple result(self):
+        """Return the best variable vector and its fitness."""
+        return array(self.best), self.best_f
+
     cpdef object run(self):
         """Run and return the result and convergence history.
 
