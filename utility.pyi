@@ -16,7 +16,6 @@ class ObjFunc(Generic[FVal]):
         """
         ...
 
-    @abstractmethod
     def result(self, v: ndarray) -> FVal:
         ...
 

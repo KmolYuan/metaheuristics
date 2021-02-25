@@ -11,7 +11,7 @@ license: AGPL
 email: pyslvs@gmail.com
 """
 
-from numpy import zeros, float64 as f64
+from numpy import array, zeros, float64 as f64
 from cython.parallel cimport prange
 from libc.math cimport HUGE_VAL
 from libc.stdlib cimport rand, srand, RAND_MAX
@@ -39,8 +39,8 @@ cdef class ObjFunc:
             raise NotImplementedError
 
     cpdef object result(self, double[:] v):
-        """Return the result from the variable list `v`."""
-        raise NotImplementedError
+        """The result function. Default is the best variable vector `v`."""
+        return array(v)
 
 
 cdef class Algorithm:
