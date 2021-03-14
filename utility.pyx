@@ -158,18 +158,17 @@ cdef class Algorithm:
             difftime(time(NULL), self.time_start),
         ))
 
-    cpdef list history(self):
+    cpdef double[:, :] history(self):
         """Return the history of the process.
 
         The first value is generation (iteration);
         the second value is fitness;
         the third value is time in second.
         """
-        ret = []
-        cdef Report report
-        for report in self.fitness_time:
-            ret.append((report.gen, report.fitness, report.time))
-        return ret
+        return array([
+            (report.gen, report.fitness, report.time)
+            for report in self.fitness_time
+        ], dtype=f64)
 
     cpdef tuple result(self):
         """Return the best variable vector and its fitness."""

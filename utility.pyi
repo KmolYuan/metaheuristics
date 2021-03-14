@@ -45,7 +45,7 @@ class Algorithm(Generic[FVal]):
         """
         ...
 
-    def history(self) -> Sequence[Tuple[int, float, float]]:
+    def history(self) -> ndarray:
         ...
 
     def result(self) -> Tuple[ndarray, float]:

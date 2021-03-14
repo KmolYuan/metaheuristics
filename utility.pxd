@@ -63,6 +63,6 @@ cdef class Algorithm:
     cdef void initialize(self) nogil
     cdef void generation_process(self) nogil
     cdef void report(self) nogil
-    cpdef list history(self)
+    cpdef double[:, :] history(self)
     cpdef tuple result(self)
     cpdef object run(self)
