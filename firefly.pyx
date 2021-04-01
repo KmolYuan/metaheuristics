@@ -41,7 +41,7 @@ cdef class Firefly(Algorithm):
     ):
         """
         settings = {
-            'n': int,
+            'pop_num': int,
             'alpha': float,
             'beta_min': float,
             'beta0': float,
@@ -51,7 +51,7 @@ cdef class Firefly(Algorithm):
         }
         """
         # n, the population size of fireflies
-        self.pop_num = settings.get('n', 80)
+        self.pop_num = settings.get('pop_num', 80)
         # alpha, the step size
         self.alpha = settings.get('alpha', 0.01)
         # beta_min, the minimal attraction, must not less than this

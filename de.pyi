@@ -21,7 +21,7 @@ class Differential(Algorithm):
         + `strategy`: Strategy
             + type: int (0~9)
             + default: 0
-        + `NP`: Population
+        + `pop_num`: Population
             + type: int
             + default: 400
         + `F`: Weight factor

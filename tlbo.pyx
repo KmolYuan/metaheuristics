@@ -29,12 +29,12 @@ cdef class TeachingLearning(Algorithm):
     ):
         """
         settings = {
-            'class_size': int,
+            'pop_num': int,
             'max_gen': int or 'min_fit': float or 'max_time': float,
             'report': int,
         }
         """
-        self.pop_num = settings.get('class_size', 50)
+        self.pop_num = settings.get('pop_num', 50)
         self.new_pop()
         self.tmp = self.make_tmp()
 

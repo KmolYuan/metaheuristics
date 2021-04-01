@@ -47,7 +47,7 @@ cdef class Differential(Algorithm):
         """
         settings = {
             'strategy': int,
-            'NP': int,
+            'pop_num': int,
             'F': float,
             'CR': float,
             'max_gen': int or 'min_fit': float or 'max_time': float,
@@ -61,8 +61,8 @@ cdef class Differential(Algorithm):
         self.strategy = <Strategy>strategy
         # population size
         # To start off np = 10*dim is a reasonable choice. Increase np if
-        # misconvergence
-        self.pop_num = settings.get('NP', 400)
+        # miss convergence
+        self.pop_num = settings.get('pop_num', 400)
         # weight factor F is usually between 0.5 and 1 (in rare cases > 1)
         self.F = settings.get('F', 0.6)
         if not (0.5 <= self.F <= 1):

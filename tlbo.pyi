@@ -15,7 +15,7 @@ class TeachingLearning(Algorithm):
     ):
         """The format of argument `settings`:
 
-        + `class_size`: The number of students per class
+        + `pop_num`: The number of students per class
             + type: int
             + default: 50
         + `max_gen` or `min_fit` or `max_time`: Limitation of termination

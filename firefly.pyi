@@ -15,7 +15,7 @@ class Firefly(Algorithm):
     ):
         """The format of argument `settings`:
 
-        + `n`: Population
+        + `pop_num`: Population
             + type: int
             + default: 80
         + `alpha`: Alpha factor

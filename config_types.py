@@ -4,6 +4,7 @@ from typing import TypedDict
 
 
 class AlgorithmConfig(TypedDict, total=False):
+    pop_num: int
     max_gen: int
     min_fit: float
     max_time: float
@@ -14,13 +15,11 @@ class AlgorithmConfig(TypedDict, total=False):
 
 class DEConfig(AlgorithmConfig):
     strategy: int
-    NP: int
     F: float
     CR: float
 
 
 class GAConfig(AlgorithmConfig):
-    pop_num: int
     cross: float
     mutate: float
     win: float
@@ -28,7 +27,6 @@ class GAConfig(AlgorithmConfig):
 
 
 class FAConfig(AlgorithmConfig):
-    n: int
     alpha: float
     beta_min: float
     beta0: float
@@ -36,4 +34,4 @@ class FAConfig(AlgorithmConfig):
 
 
 class TOBLConfig(AlgorithmConfig):
-    class_size: int
+    pass

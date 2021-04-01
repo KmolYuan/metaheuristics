@@ -44,7 +44,7 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
         'delta': 5.,
     },
     AlgorithmType.Firefly: {
-        'n': 80,
+        'pop_num': 80,
         'alpha': 0.01,
         'beta_min': 0.2,
         'gamma': 1.,
@@ -52,12 +52,12 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
     },
     AlgorithmType.DE: {
         'strategy': 1,
-        'NP': 400,
+        'pop_num': 400,
         'F': 0.6,
         'CR': 0.9,
     },
     AlgorithmType.TLBO: {
-        'class_size': 50,
+        'pop_num': 50,
     },
 }
 
