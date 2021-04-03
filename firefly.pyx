@@ -50,8 +50,6 @@ cdef class Firefly(Algorithm):
             'report': int,
         }
         """
-        # n, the population size of fireflies
-        self.pop_num = settings.get('pop_num', 80)
         # alpha, the step size
         self.alpha = settings.get('alpha', 0.01)
         # beta_min, the minimal attraction, must not less than this
@@ -60,8 +58,6 @@ cdef class Firefly(Algorithm):
         self.beta0 = settings.get('beta0', 1.)
         # gamma
         self.gamma = settings.get('gamma', 1.)
-        # all fireflies, depended on population n
-        self.new_pop()
 
     cdef inline void initialize(self) nogil:
         """Initial population."""

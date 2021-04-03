@@ -76,6 +76,7 @@ cdef class Algorithm:
             self.stop_at_f = 1 - settings['slow_down']
         else:
             raise ValueError("please give 'max_gen', 'min_fit' or 'max_time' limit")
+        self.pop_num = settings.get('pop_num', 500)
         self.rpt = settings.get('report', 0)
         if self.rpt <= 0:
             self.rpt = 10
@@ -85,17 +86,14 @@ cdef class Algorithm:
         self.dim = len(self.func.ub)
         if self.dim != len(self.func.lb):
             raise ValueError("length of upper and lower bounds must be equal")
+        self.fitness = zeros(self.pop_num, dtype=f64)
+        self.pool = zeros((self.pop_num, self.dim), dtype=f64)
         self.best_f = HUGE_VAL
         self.best = zeros(self.dim, dtype=f64)
         # setup benchmark
         self.func.gen = 0
         self.time_start = 0
         self.fitness_time = []
-
-    cdef void new_pop(self):
-        """New population."""
-        self.fitness = zeros(self.pop_num, dtype=f64)
-        self.pool = zeros((self.pop_num, self.dim), dtype=f64)
 
     cdef double[:] make_tmp(self):
         """Make new chromosome."""

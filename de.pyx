@@ -59,10 +59,6 @@ cdef class Differential(Algorithm):
         if strategy > 9:
             raise ValueError(f"invalid strategy: {strategy}")
         self.strategy = <Strategy>strategy
-        # population size
-        # To start off np = 10*dim is a reasonable choice. Increase np if
-        # miss convergence
-        self.pop_num = settings.get('pop_num', 400)
         # weight factor F is usually between 0.5 and 1 (in rare cases > 1)
         self.F = settings.get('F', 0.6)
         if not (0.5 <= self.F <= 1):
@@ -73,8 +69,6 @@ cdef class Differential(Algorithm):
             raise ValueError('CR should be [0,1]')
         # the vector
         self.r1 = self.r2 = self.r3 = self.r4 = self.r5 = 0
-        # generation pool
-        self.new_pop()
         self.tmp = self.make_tmp()
 
     cdef inline void initialize(self) nogil:

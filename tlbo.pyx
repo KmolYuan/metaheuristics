@@ -34,8 +34,6 @@ cdef class TeachingLearning(Algorithm):
             'report': int,
         }
         """
-        self.pop_num = settings.get('pop_num', 50)
-        self.new_pop()
         self.tmp = self.make_tmp()
 
     cdef inline void initialize(self) nogil:

@@ -42,12 +42,10 @@ cdef class Genetic(Algorithm):
             'report': int,
         }
         """
-        self.pop_num = settings.get('pop_num', 500)
         self.cross = settings.get('cross', 0.95)
         self.mutate_f = settings.get('mutate', 0.05)
         self.win = settings.get('win', 0.95)
         self.delta = settings.get('delta', 5.)
-        self.new_pop()
         self.new_fitness = zeros(self.pop_num, dtype=f64)
         self.new_pool = zeros((self.pop_num, self.dim), dtype=f64)
         self.tmp1 = self.make_tmp()
