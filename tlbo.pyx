@@ -36,9 +36,9 @@ cdef class TeachingLearning(Algorithm):
         """
         self.tmp = self.make_tmp()
 
-    cdef inline void initialize(self) nogil:
+    cdef inline void init(self) nogil:
         """Initial population: Sorted students."""
-        self.initialize_pop()
+        self.init_pop()
         self.find_best()
 
     cdef inline void teaching(self, uint i) nogil:
@@ -88,7 +88,7 @@ cdef class TeachingLearning(Algorithm):
         if self.fitness[i] < self.best_f:
             self.set_best(i)
 
-    cdef inline void generation_process(self) nogil:
+    cdef inline void generation(self) nogil:
         """The process of each generation."""
         cdef uint i
         for i in range(self.pop_num):

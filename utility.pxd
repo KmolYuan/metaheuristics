@@ -58,9 +58,9 @@ cdef class Algorithm:
     cdef void set_best(self, uint i) nogil
     cdef void find_best(self) nogil
 
-    cdef void initialize_pop(self) nogil
-    cdef void initialize(self) nogil
-    cdef void generation_process(self) nogil
+    cdef void init_pop(self) nogil
+    cdef void init(self) nogil
+    cdef void generation(self) nogil
     cdef void report(self) nogil
     cpdef double[:, :] history(self)
     cpdef tuple result(self)

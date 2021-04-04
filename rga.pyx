@@ -59,8 +59,8 @@ cdef class Genetic(Algorithm):
             return rand_v(self.func.lb[i], self.func.ub[i])
         return v
 
-    cdef inline void initialize(self) nogil:
-        self.initialize_pop()
+    cdef inline void init(self) nogil:
+        self.init_pop()
         self.set_best(0)
 
     cdef inline void crossover(self) nogil:
@@ -142,7 +142,7 @@ cdef class Genetic(Algorithm):
         # select random one chromosome to be best chromosome, make best chromosome still exist
         self.assign_from(rand_i(self.pop_num), self.best_f, self.best)
 
-    cdef inline void generation_process(self) nogil:
+    cdef inline void generation(self) nogil:
         self.select()
         self.crossover()
         self.mutate()

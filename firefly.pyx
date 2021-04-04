@@ -59,16 +59,15 @@ cdef class Firefly(Algorithm):
         # gamma
         self.gamma = settings.get('gamma', 1.)
 
-    cdef inline void initialize(self) nogil:
+    cdef inline void init(self) nogil:
         """Initial population."""
-        self.initialize_pop()
+        self.init_pop()
         self.set_best(0)
 
     cdef inline void move_fireflies(self) nogil:
         """Move fireflies."""
         cdef bint is_move
         cdef uint i, j, s
-        cdef double scale, tmp_v
         for i in range(self.pop_num):
             moved = False
             for j in range(self.pop_num):
@@ -103,7 +102,7 @@ cdef class Firefly(Algorithm):
         else:
             return v
 
-    cdef inline void generation_process(self) nogil:
+    cdef inline void generation(self) nogil:
         self.move_fireflies()
         # Get fitness
         cdef uint i

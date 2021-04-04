@@ -124,7 +124,7 @@ cdef class Algorithm:
         if self.fitness[best] < self.best_f:
             self.set_best(best)
 
-    cdef void initialize_pop(self) nogil:
+    cdef void init_pop(self) nogil:
         """Initialize population."""
         cdef uint i, s
         if self.parallel:
@@ -138,12 +138,12 @@ cdef class Algorithm:
                     self.pool[i, s] = rand_v(self.func.lb[s], self.func.ub[s])
                 self.fitness[i] = self.func.fitness(self.pool[i, :])
 
-    cdef void initialize(self) nogil:
+    cdef void init(self) nogil:
         """Initialize function."""
         with gil:
             raise NotImplementedError
 
-    cdef void generation_process(self) nogil:
+    cdef void generation(self) nogil:
         """The process of each generation."""
         with gil:
             raise NotImplementedError
@@ -189,7 +189,7 @@ cdef class Algorithm:
                 self.func.ub[i], self.func.lb[i] = self.func.lb[i], self.func.ub[i]
         # Start
         self.time_start = time(NULL)
-        self.initialize()
+        self.init()
         self.report()
         # Iterations
         cdef double diff, best_f
@@ -197,7 +197,7 @@ cdef class Algorithm:
         while True:
             best_f = self.best_f
             self.func.gen += 1
-            self.generation_process()
+            self.generation()
             if self.func.gen % self.rpt == 0:
                 self.report()
             if self.stop_at == MAX_GEN:
