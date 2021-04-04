@@ -41,6 +41,20 @@ cdef class TeachingLearning(Algorithm):
         self.init_pop()
         self.find_best()
 
+    cdef inline void bounding(self, uint s) nogil:
+        if self.tmp[s] < self.func.lb[s]:
+            self.tmp[s] = self.func.lb[s]
+        elif self.tmp[s] > self.func.ub[s]:
+            self.tmp[s] = self.func.ub[s]
+
+    cdef inline void register(self, uint i) nogil:
+        cdef double f_new = self.func.fitness(self.tmp)
+        if f_new < self.fitness[i]:
+            self.pool[i, :] = self.tmp
+            self.fitness[i] = f_new
+        if self.fitness[i] < self.best_f:
+            self.set_best(i)
+
     cdef inline void teaching(self, uint i) nogil:
         """Teaching phase. The last best is the teacher."""
         cdef double tf = round(1 + rand_v())
@@ -53,16 +67,8 @@ cdef class TeachingLearning(Algorithm):
             mean /= self.dim
             self.tmp[s] = self.pool[i, s] + rand_v(1, self.dim) * (
                 self.best[s] - tf * mean)
-            if self.tmp[s] < self.func.lb[s]:
-                self.tmp[s] = self.func.lb[s]
-            elif self.tmp[s] > self.func.ub[s]:
-                self.tmp[s] = self.func.ub[s]
-        cdef double f_new = self.func.fitness(self.tmp)
-        if f_new < self.fitness[i]:
-            self.pool[i, :] = self.tmp
-            self.fitness[i] = f_new
-        if self.fitness[i] < self.best_f:
-            self.set_best(i)
+            self.bounding(s)
+        self.register(i)
 
     cdef inline void learning(self, uint i) nogil:
         """Learning phase."""
@@ -77,16 +83,8 @@ cdef class TeachingLearning(Algorithm):
             else:
                 diff = self.pool[j, s] - self.pool[i, s]
             self.tmp[s] = self.pool[i, s] + diff * rand_v(1, self.dim)
-            if self.tmp[s] < self.func.lb[s]:
-                self.tmp[s] = self.func.lb[s]
-            elif self.tmp[s] > self.func.ub[s]:
-                self.tmp[s] = self.func.ub[s]
-        cdef double f_new = self.func.fitness(self.tmp)
-        if f_new < self.fitness[i]:
-            self.pool[i, :] = self.tmp
-            self.fitness[i] = f_new
-        if self.fitness[i] < self.best_f:
-            self.set_best(i)
+            self.bounding(s)
+        self.register(i)
 
     cdef inline void generation(self) nogil:
         """The process of each generation."""
