@@ -6,6 +6,7 @@ from .utility import Algorithm, ObjFunc, FVal
 from .config_types import DESetting
 
 class Strategy(IntEnum):
+    """Differential Evolution strategy."""
     S1 = auto()
     S2 = auto()
     S3 = auto()

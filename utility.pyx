@@ -60,20 +60,19 @@ cdef class Algorithm:
         srand(time(NULL))
         # object function
         self.func = func
-        self.stop_at_i = 0
-        self.stop_at_f = 0.
+        self.stop_at = 0
         if 'max_gen' in settings:
-            self.stop_at = MAX_GEN
-            self.stop_at_i = settings['max_gen']
+            self.task = MAX_GEN
+            self.stop_at = settings['max_gen']
         elif 'min_fit' in settings:
-            self.stop_at = MIN_FIT
-            self.stop_at_f = settings['min_fit']
+            self.task = MIN_FIT
+            self.stop_at = settings['min_fit']
         elif 'max_time' in settings:
-            self.stop_at = MAX_TIME
-            self.stop_at_f = settings['max_time']
+            self.task = MAX_TIME
+            self.stop_at = settings['max_time']
         elif 'slow_down' in settings:
-            self.stop_at = SLOW_DOWN
-            self.stop_at_f = 1 - settings['slow_down']
+            self.task = SLOW_DOWN
+            self.stop_at = 1 - settings['slow_down']
         else:
             raise ValueError("please give 'max_gen', 'min_fit' or 'max_time' limit")
         self.pop_num = settings.get('pop_num', 500)
@@ -93,7 +92,7 @@ cdef class Algorithm:
         # setup benchmark
         self.func.gen = 0
         self.time_start = 0
-        self.fitness_time = []
+        self.reports = clist[Report]()
 
     cdef double[:] make_tmp(self):
         """Make new chromosome."""
@@ -150,7 +149,7 @@ cdef class Algorithm:
 
     cdef inline void report(self) nogil:
         """Report generation, fitness and time."""
-        self.fitness_time.push_back(Report(
+        self.reports.push_back(Report(
             self.func.gen,
             self.best_f,
             difftime(time(NULL), self.time_start),
@@ -165,7 +164,7 @@ cdef class Algorithm:
         """
         return array([
             (report.gen, report.fitness, report.time)
-            for report in self.fitness_time
+            for report in self.reports
         ], dtype=f64)
 
     cpdef tuple result(self):
@@ -200,18 +199,18 @@ cdef class Algorithm:
             self.generation()
             if self.func.gen % self.rpt == 0:
                 self.report()
-            if self.stop_at == MAX_GEN:
-                if self.func.gen >= self.stop_at_i > 0:
+            if self.task == MAX_GEN:
+                if self.func.gen >= self.stop_at > 0:
                     break
-            elif self.stop_at == MIN_FIT:
-                if self.best_f <= self.stop_at_f:
+            elif self.task == MIN_FIT:
+                if self.best_f <= self.stop_at:
                     break
-            elif self.stop_at == MAX_TIME:
-                if difftime(time(NULL), self.time_start) >= self.stop_at_f > 0:
+            elif self.task == MAX_TIME:
+                if difftime(time(NULL), self.time_start) >= self.stop_at > 0:
                     break
-            elif self.stop_at == SLOW_DOWN:
+            elif self.task == SLOW_DOWN:
                 diff = best_f - self.best_f
-                if last_diff > 0 and diff / last_diff >= self.stop_at_f:
+                if last_diff > 0 and diff / last_diff >= self.stop_at:
                     break
                 last_diff = diff
             # progress

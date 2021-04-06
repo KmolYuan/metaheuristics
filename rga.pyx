@@ -97,8 +97,8 @@ cdef class RGA(Algorithm):
 
     cdef inline double get_delta(self, double y) nogil:
         cdef double r
-        if self.stop_at == MAX_GEN and self.stop_at_i > 0:
-            r = <double>self.func.gen / self.stop_at_i
+        if self.task == MAX_GEN and self.stop_at > 0:
+            r = <double>self.func.gen / self.stop_at
         else:
             r = 1
         return y * rand_v() * pow(1.0 - r, self.delta)

@@ -13,7 +13,7 @@ email: pyslvs@gmail.com
 cimport cython
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
-ctypedef void (*Eq)(DE, uint) nogil
+ctypedef void (*F)(DE, uint) nogil
 
 
 cpdef enum Strategy:
@@ -119,7 +119,7 @@ cdef class DE(Algorithm):
         """use new vector, recombination the new one member to tmp."""
         self.tmp[:] = self.pool[i, :]
         cdef uint n = rand_i(self.dim)
-        cdef Eq func
+        cdef F func
         if self.strategy in {S1, S6}:
             func = DE.f1
         elif self.strategy in {S2, S7}:

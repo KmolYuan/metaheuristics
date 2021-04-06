@@ -41,13 +41,13 @@ cdef class ObjFunc:
 
 cdef class Algorithm:
     cdef bint parallel
-    cdef uint pop_num, dim, stop_at_i, rpt
-    cdef Task stop_at
-    cdef double stop_at_f, best_f
+    cdef uint pop_num, dim, rpt
+    cdef Task task
+    cdef double stop_at, best_f
     cdef double[:] best, fitness
     cdef double[:, :] pool
     cdef time_t time_start
-    cdef clist[Report] fitness_time
+    cdef clist[Report] reports
     cdef object progress_fun, interrupt_fun
     cdef public ObjFunc func
 
