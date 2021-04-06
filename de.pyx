@@ -13,7 +13,7 @@ email: pyslvs@gmail.com
 cimport cython
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
-ctypedef void (*F)(DE, uint) nogil
+ctypedef double (*F)(DE, uint) nogil
 
 
 cpdef enum Strategy:
@@ -36,6 +36,7 @@ cdef class DE(Algorithm):
     cdef uint r1, r2, r3, r4, r5
     cdef double F, CR
     cdef double[:] tmp
+    cdef F formula
 
     def __cinit__(
         self,
@@ -67,6 +68,16 @@ cdef class DE(Algorithm):
         # the vector
         self.r1 = self.r2 = self.r3 = self.r4 = self.r5 = 0
         self.tmp = self.make_tmp()
+        if self.strategy in {S1, S6}:
+            self.formula = DE.f1
+        elif self.strategy in {S2, S7}:
+            self.formula = DE.f2
+        elif self.strategy in {S3, S8}:
+            self.formula = DE.f3
+        elif self.strategy in {S4, S9}:
+            self.formula = DE.f4
+        else:
+            self.formula = DE.f5
 
     cdef inline void init(self) nogil:
         """Initial population."""
@@ -93,25 +104,25 @@ cdef class DE(Algorithm):
         while self.r5 in {i, self.r1, self.r2, self.r3, self.r4}:
             self.r5 = rand_i(self.pop_num)
 
-    cdef void f1(self, uint n) nogil:
-        self.tmp[n] = self.best[n] + self.F * (
+    cdef double f1(self, uint n) nogil:
+        return self.best[n] + self.F * (
             self.pool[self.r1, n] - self.pool[self.r2, n])
 
-    cdef void f2(self, uint n) nogil:
-        self.tmp[n] = self.pool[self.r1, n] + self.F * (
+    cdef double f2(self, uint n) nogil:
+        return self.pool[self.r1, n] + self.F * (
             self.pool[self.r2, n] - self.pool[self.r3, n])
 
-    cdef void f3(self, uint n) nogil:
-        self.tmp[n] = self.tmp[n] + self.F * (self.best[n] - self.tmp[n]
-                       + self.pool[self.r1, n] - self.pool[self.r2, n])
+    cdef double f3(self, uint n) nogil:
+        return self.tmp[n] + self.F * (self.best[n] - self.tmp[n]
+            + self.pool[self.r1, n] - self.pool[self.r2, n])
 
-    cdef void f4(self, uint n) nogil:
-        self.tmp[n] = self.best[n] + self.F * (
+    cdef double f4(self, uint n) nogil:
+        return self.best[n] + self.F * (
             self.pool[self.r1, n] + self.pool[self.r2, n]
             - self.pool[self.r3, n] - self.pool[self.r4, n])
 
-    cdef void f5(self, uint n) nogil:
-        self.tmp[n] = self.pool[self.r5, n] + self.F * (
+    cdef double f5(self, uint n) nogil:
+        return self.pool[self.r5, n] + self.F * (
             self.pool[self.r1, n] + self.pool[self.r2, n]
             - self.pool[self.r3, n] - self.pool[self.r4, n])
 
@@ -119,22 +130,11 @@ cdef class DE(Algorithm):
         """use new vector, recombination the new one member to tmp."""
         self.tmp[:] = self.pool[i, :]
         cdef uint n = rand_i(self.dim)
-        cdef F func
-        if self.strategy in {S1, S6}:
-            func = DE.f1
-        elif self.strategy in {S2, S7}:
-            func = DE.f2
-        elif self.strategy in {S3, S8}:
-            func = DE.f3
-        elif self.strategy in {S4, S9}:
-            func = DE.f4
-        else:
-            func = DE.f5
         cdef uint l_v
         if self.strategy in {S1, S2, S3, S4, S5}:
             l_v = 0
             while True:
-                func(self, n)
+                self.tmp[n] = self.formula(self, n)
                 n = (n + 1) % self.dim
                 l_v += 1
                 if rand_v() >= self.CR or l_v >= self.dim:
@@ -142,7 +142,7 @@ cdef class DE(Algorithm):
         else:
             for l_v in range(self.dim):
                 if rand_v() < self.CR or l_v == self.dim - 1:
-                    func(self, n)
+                    self.tmp[n] = self.formula(self, n)
                 n = (n + 1) % self.dim
 
     cdef inline bint check(self) nogil:
