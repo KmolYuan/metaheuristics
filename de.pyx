@@ -17,7 +17,6 @@ ctypedef void (*Eq)(DE, uint) nogil
 
 
 cpdef enum Strategy:
-    S0
     S1
     S2
     S3
@@ -27,6 +26,7 @@ cpdef enum Strategy:
     S7
     S8
     S9
+    S10
 
 
 @cython.final
