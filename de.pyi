@@ -1,15 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from typing import Callable, Optional
+from enum import auto, IntEnum
 from .utility import Algorithm, ObjFunc, FVal
-from .config_types import DEConfig
+from .config_types import DESetting
 
-class Differential(Algorithm):
+class Strategy(IntEnum):
+    S1 = auto()
+    S2 = auto()
+    S3 = auto()
+    S4 = auto()
+    S5 = auto()
+    S6 = auto()
+    S7 = auto()
+    S8 = auto()
+    S9 = auto()
+    S0 = auto()
+
+class DE(Algorithm):
 
     def __init__(
         self,
         func: ObjFunc[FVal],
-        settings: DEConfig,
+        settings: DESetting,
         progress_fun: Optional[Callable[[int, str], None]] = None,
         interrupt_fun: Optional[Callable[[], bool]] = None
     ):

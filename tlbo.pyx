@@ -16,7 +16,7 @@ from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
 
 @cython.final
-cdef class TeachingLearning(Algorithm):
+cdef class TLBO(Algorithm):
     """The implementation of Teaching Learning Based Optimization."""
     cdef double[:] tmp
 

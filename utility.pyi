@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from typing import TypeVar, Tuple, Sequence, Callable, Optional, Generic
 from numpy import ndarray, double
-from .config_types import AlgorithmConfig
+from .config_types import Setting
 
 FVal = TypeVar('FVal')
 
@@ -30,7 +30,7 @@ class Algorithm(Generic[FVal]):
     def __init__(
         self,
         func: ObjFunc[FVal],
-        settings: AlgorithmConfig,
+        settings: Setting,
         progress_fun: Optional[Callable[[int, str], None]] = None,
         interrupt_fun: Optional[Callable[[], bool]] = None
     ):

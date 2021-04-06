@@ -2,14 +2,14 @@
 
 from typing import Callable, Optional
 from .utility import Algorithm, ObjFunc, FVal
-from .config_types import GAConfig
+from .config_types import RGASetting
 
-class Genetic(Algorithm):
+class RGA(Algorithm):
 
     def __init__(
         self,
         func: ObjFunc[FVal],
-        settings: GAConfig,
+        settings: RGASetting,
         progress_fun: Optional[Callable[[int, str], None]] = None,
         interrupt_fun: Optional[Callable[[], bool]] = None
     ):

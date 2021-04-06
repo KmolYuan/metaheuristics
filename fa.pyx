@@ -28,7 +28,7 @@ cdef double _distance(double[:] me, double[:] she, uint dim) nogil:
 
 
 @cython.final
-cdef class Firefly(Algorithm):
+cdef class FA(Algorithm):
     """The implementation of Firefly Algorithm."""
     cdef double alpha, beta_min, beta0, gamma
 

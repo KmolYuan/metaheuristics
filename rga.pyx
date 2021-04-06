@@ -18,7 +18,7 @@ from .utility cimport uint, MAX_GEN, rand_v, rand_i, ObjFunc, Algorithm
 
 
 @cython.final
-cdef class Genetic(Algorithm):
+cdef class RGA(Algorithm):
     """The implementation of Real-coded Genetic Algorithm."""
     cdef double cross, mutate_f, win, delta
     cdef double[:] new_fitness, tmp1, tmp2, tmp3, f_tmp

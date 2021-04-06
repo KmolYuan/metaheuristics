@@ -13,24 +13,24 @@ email: pyslvs@gmail.com
 cimport cython
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
-ctypedef void (*Eq)(Differential, uint) nogil
+ctypedef void (*Eq)(DE, uint) nogil
 
 
-cdef enum Strategy:
-    STRATEGY0
-    STRATEGY1
-    STRATEGY2
-    STRATEGY3
-    STRATEGY4
-    STRATEGY5
-    STRATEGY6
-    STRATEGY7
-    STRATEGY8
-    STRATEGY9
+cpdef enum Strategy:
+    S0
+    S1
+    S2
+    S3
+    S4
+    S5
+    S6
+    S7
+    S8
+    S9
 
 
 @cython.final
-cdef class Differential(Algorithm):
+cdef class DE(Algorithm):
     """The implementation of Differential Evolution."""
     cdef Strategy strategy
     cdef uint r1, r2, r3, r4, r5
@@ -55,10 +55,7 @@ cdef class Differential(Algorithm):
         }
         """
         # strategy 0~9, choice what strategy to generate new member in temporary
-        cdef uint strategy = settings.get('strategy', STRATEGY1)
-        if strategy > 9:
-            raise ValueError(f"invalid strategy: {strategy}")
-        self.strategy = <Strategy>strategy
+        self.strategy = Strategy(settings.get('strategy', S1))
         # weight factor F is usually between 0.5 and 1 (in rare cases > 1)
         self.F = settings.get('F', 0.6)
         if not (0.5 <= self.F <= 1):
@@ -83,36 +80,18 @@ cdef class Differential(Algorithm):
             self.r1 = rand_i(self.pop_num)
         while self.r2 in {i, self.r1}:
             self.r2 = rand_i(self.pop_num)
-        if self.strategy in {STRATEGY1, STRATEGY3, STRATEGY6, STRATEGY8}:
+        if self.strategy in {S1, S3, S6, S8}:
             return
         while self.r3 in {i, self.r1, self.r2}:
             self.r3 = rand_i(self.pop_num)
-        if self.strategy in {STRATEGY2, STRATEGY7}:
+        if self.strategy in {S2, S7}:
             return
         while self.r4 in {i, self.r1, self.r2, self.r3}:
             self.r4 = rand_i(self.pop_num)
-        if self.strategy in {STRATEGY4, STRATEGY9}:
+        if self.strategy in {S4, S9}:
             return
         while self.r5 in {i, self.r1, self.r2, self.r3, self.r4}:
             self.r5 = rand_i(self.pop_num)
-
-    cdef void type1(self, Eq func) nogil:
-        cdef uint n = rand_i(self.dim)
-        cdef uint l_v = 0
-        while True:
-            func(self, n)
-            n = (n + 1) % self.dim
-            l_v += 1
-            if rand_v() >= self.CR or l_v >= self.dim:
-                break
-
-    cdef void type2(self, Eq func) nogil:
-        cdef uint n = rand_i(self.dim)
-        cdef uint l_v
-        for l_v in range(self.dim):
-            if rand_v() < self.CR or l_v == self.dim - 1:
-                func(self, n)
-            n = (n + 1) % self.dim
 
     cdef void f1(self, uint n) nogil:
         self.tmp[n] = self.best[n] + self.F * (
@@ -139,26 +118,32 @@ cdef class Differential(Algorithm):
     cdef inline void recombination(self, int i) nogil:
         """use new vector, recombination the new one member to tmp."""
         self.tmp[:] = self.pool[i, :]
-        if self.strategy == 1:
-            self.type1(Differential.f1)
-        elif self.strategy == 2:
-            self.type1(Differential.f2)
-        elif self.strategy == 3:
-            self.type1(Differential.f3)
-        elif self.strategy == 4:
-            self.type1(Differential.f4)
-        elif self.strategy == 5:
-            self.type1(Differential.f5)
-        elif self.strategy == 6:
-            self.type2(Differential.f1)
-        elif self.strategy == 7:
-            self.type2(Differential.f2)
-        elif self.strategy == 8:
-            self.type2(Differential.f3)
-        elif self.strategy == 9:
-            self.type2(Differential.f4)
-        elif self.strategy == 0:
-            self.type2(Differential.f5)
+        cdef uint n = rand_i(self.dim)
+        cdef Eq func
+        if self.strategy in {S1, S6}:
+            func = DE.f1
+        elif self.strategy in {S2, S7}:
+            func = DE.f2
+        elif self.strategy in {S3, S8}:
+            func = DE.f3
+        elif self.strategy in {S4, S9}:
+            func = DE.f4
+        else:
+            func = DE.f5
+        cdef uint l_v
+        if self.strategy in {S1, S2, S3, S4, S5}:
+            l_v = 0
+            while True:
+                func(self, n)
+                n = (n + 1) % self.dim
+                l_v += 1
+                if rand_v() >= self.CR or l_v >= self.dim:
+                    break
+        else:
+            for l_v in range(self.dim):
+                if rand_v() < self.CR or l_v == self.dim - 1:
+                    func(self, n)
+                n = (n + 1) % self.dim
 
     cdef inline bint check(self) nogil:
         """check the member's chromosome that is out of bound?"""

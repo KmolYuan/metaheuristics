@@ -11,28 +11,28 @@ from typing import Mapping, Dict, Union, Type
 from enum import unique, Enum
 from .utility import ObjFunc, Algorithm
 from .config_types import (
-    AlgorithmConfig, DEConfig, FAConfig, GAConfig, TOBLConfig,
+    Setting, DESetting, FASetting, RGASetting, TOBLSetting,
 )
-from .rga import Genetic
-from .firefly import Firefly
-from .de import Differential
-from .tlbo import TeachingLearning
+from .rga import RGA
+from .fa import FA
+from .de import DE
+from .tlbo import TLBO
 
 
 @unique
 class AlgorithmType(str, Enum):
     """Enum type of algorithms."""
     RGA = "Real-coded Genetic Algorithm"
-    Firefly = "Firefly Algorithm"
+    FA = "Firefly Algorithm"
     DE = "Differential Evolution"
     TLBO = "Teaching Learning Based Optimization"
 
 
 _ALGORITHM: Mapping[AlgorithmType, Type[Algorithm]] = {
-    AlgorithmType.RGA: Genetic,
-    AlgorithmType.Firefly: Firefly,
-    AlgorithmType.DE: Differential,
-    AlgorithmType.TLBO: TeachingLearning,
+    AlgorithmType.RGA: RGA,
+    AlgorithmType.FA: FA,
+    AlgorithmType.DE: DE,
+    AlgorithmType.TLBO: TLBO,
 }
 _DEFAULT_PARAMS = {'max_gen': 1000, 'report': 50}
 _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
@@ -43,7 +43,7 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
         'win': 0.95,
         'delta': 5.,
     },
-    AlgorithmType.Firefly: {
+    AlgorithmType.FA: {
         'pop_num': 80,
         'alpha': 0.01,
         'beta_min': 0.2,

@@ -2,14 +2,14 @@
 
 from typing import Callable, Optional
 from .utility import Algorithm, ObjFunc, FVal
-from .config_types import FAConfig
+from .config_types import FASetting
 
-class Firefly(Algorithm):
+class FA(Algorithm):
 
     def __init__(
         self,
         func: ObjFunc[FVal],
-        settings: FAConfig,
+        settings: FASetting,
         progress_fun: Optional[Callable[[int, str], None]] = None,
         interrupt_fun: Optional[Callable[[], bool]] = None
     ):

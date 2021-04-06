@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from typing import TypedDict
+from .de import Strategy
 
 
-class AlgorithmConfig(TypedDict, total=False):
+class Setting(TypedDict, total=False):
     pop_num: int
     max_gen: int
     min_fit: float
@@ -13,25 +14,25 @@ class AlgorithmConfig(TypedDict, total=False):
     parallel: bool
 
 
-class DEConfig(AlgorithmConfig):
-    strategy: int
+class DESetting(Setting):
+    strategy: Strategy
     F: float
     CR: float
 
 
-class GAConfig(AlgorithmConfig):
+class RGASetting(Setting):
     cross: float
     mutate: float
     win: float
     delta: float
 
 
-class FAConfig(AlgorithmConfig):
+class FASetting(Setting):
     alpha: float
     beta_min: float
     beta0: float
     gamma: float
 
 
-class TOBLConfig(AlgorithmConfig):
+class TOBLSetting(Setting):
     pass

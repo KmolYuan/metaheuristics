@@ -2,14 +2,14 @@
 
 from typing import Callable, Optional
 from .utility import Algorithm, ObjFunc, FVal
-from .config_types import TOBLConfig
+from .config_types import TOBLSetting
 
-class TeachingLearning(Algorithm):
+class TLBO(Algorithm):
 
     def __init__(
         self,
         func: ObjFunc[FVal],
-        settings: TOBLConfig,
+        settings: TOBLSetting,
         progress_fun: Optional[Callable[[int, str], None]] = None,
         interrupt_fun: Optional[Callable[[], bool]] = None
     ):
