@@ -25,17 +25,17 @@ cdef class TestObj(ObjFunc):
     """
 
     def __cinit__(self):
-        self.ub = array([100, 100], dtype=f64)
-        self.lb = array([0, 0], dtype=f64)
+        self.ub = array([100] * 4, dtype=f64)
+        self.lb = array([0] * 4, dtype=f64)
 
     cdef double target(self, double[:] v) nogil:
-        return v[0] * v[0] + 8 * v[1]
+        return v[0] * v[0] + 8 * v[1] * v[1] + v[2] * v[2] + v[3] * v[3]
 
     cdef double fitness(self, double[:] v) nogil:
         return self.target(v)
 
     cpdef object result(self, double[:] v):
-        return tuple(v), self.target(v)
+        return self.target(v)
 
 
 cdef double[:] _radial_basis(double[:, :] x,  double[:] beta, double theta,
