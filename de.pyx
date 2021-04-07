@@ -11,6 +11,7 @@ email: pyslvs@gmail.com
 """
 
 cimport cython
+from numpy import zeros, uint32 as usize
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
 ctypedef double (*F)(DE, uint) nogil
@@ -33,8 +34,8 @@ cpdef enum Strategy:
 cdef class DE(Algorithm):
     """The implementation of Differential Evolution."""
     cdef Strategy strategy
-    cdef uint r1, r2, r3, r4, r5
     cdef double F, CR
+    cdef uint[:] v
     cdef double[:] tmp
     cdef F formula
 
@@ -66,7 +67,16 @@ cdef class DE(Algorithm):
         if not (0 <= self.CR <= 1):
             raise ValueError('CR should be [0,1]')
         # the vector
-        self.r1 = self.r2 = self.r3 = self.r4 = self.r5 = 0
+        cdef uint num
+        if self.strategy in {S1, S3, S6, S8}:
+            num = 2
+        elif self.strategy in {S2, S7}:
+            num = 3
+        elif self.strategy in {S4, S9}:
+            num = 4
+        else:
+            num = 5
+        self.v = zeros(num, dtype=usize)
         self.tmp = self.make_tmp()
         if self.strategy in {S1, S6}:
             self.formula = DE.f1
@@ -86,45 +96,39 @@ cdef class DE(Algorithm):
 
     cdef inline void vector(self, uint i) nogil:
         """Generate new vectors."""
-        self.r1 = self.r2 = self.r3 = self.r4 = self.r5 = i
-        while self.r1 == i:
-            self.r1 = rand_i(self.pop_num)
-        while self.r2 in {i, self.r1}:
-            self.r2 = rand_i(self.pop_num)
-        if self.strategy in {S1, S3, S6, S8}:
-            return
-        while self.r3 in {i, self.r1, self.r2}:
-            self.r3 = rand_i(self.pop_num)
-        if self.strategy in {S2, S7}:
-            return
-        while self.r4 in {i, self.r1, self.r2, self.r3}:
-            self.r4 = rand_i(self.pop_num)
-        if self.strategy in {S4, S9}:
-            return
-        while self.r5 in {i, self.r1, self.r2, self.r3, self.r4}:
-            self.r5 = rand_i(self.pop_num)
+        cdef uint j
+        for j in range(len(self.v)):
+            self.v[j] = i
+            while True:
+                if self.v[j] != i:
+                    for k in range(j):
+                        if self.v[j] == self.v[k]:
+                            break
+                    else:
+                        break
+                self.v[j] = rand_i(self.pop_num)
 
     cdef double f1(self, uint n) nogil:
         return self.best[n] + self.F * (
-            self.pool[self.r1, n] - self.pool[self.r2, n])
+            self.pool[self.v[0], n] - self.pool[self.v[1], n])
 
     cdef double f2(self, uint n) nogil:
-        return self.pool[self.r1, n] + self.F * (
-            self.pool[self.r2, n] - self.pool[self.r3, n])
+        return self.pool[self.v[0], n] + self.F * (
+            self.pool[self.v[1], n] - self.pool[self.v[2], n])
 
     cdef double f3(self, uint n) nogil:
         return self.tmp[n] + self.F * (self.best[n] - self.tmp[n]
-            + self.pool[self.r1, n] - self.pool[self.r2, n])
+            + self.pool[self.v[0], n] - self.pool[self.v[1], n])
 
     cdef double f4(self, uint n) nogil:
         return self.best[n] + self.F * (
-            self.pool[self.r1, n] + self.pool[self.r2, n]
-            - self.pool[self.r3, n] - self.pool[self.r4, n])
+            self.pool[self.v[0], n] + self.pool[self.v[1], n]
+            - self.pool[self.v[2], n] - self.pool[self.v[3], n])
 
     cdef double f5(self, uint n) nogil:
-        return self.pool[self.r5, n] + self.F * (
-            self.pool[self.r1, n] + self.pool[self.r2, n]
-            - self.pool[self.r3, n] - self.pool[self.r4, n])
+        return self.pool[self.v[4], n] + self.F * (
+            self.pool[self.v[0], n] + self.pool[self.v[1], n]
+            - self.pool[self.v[2], n] - self.pool[self.v[3], n])
 
     cdef inline void recombination(self, int i) nogil:
         """use new vector, recombination the new one member to tmp."""
