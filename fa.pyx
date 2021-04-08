@@ -39,25 +39,14 @@ cdef class FA(Algorithm):
         object progress_fun=None,
         object interrupt_fun=None
     ):
-        """
-        settings = {
-            'pop_num': int,
-            'alpha': float,
-            'beta_min': float,
-            'beta0': float,
-            'gamma': float,
-            'max_gen': int or 'min_fit': float or 'max_time': float,
-            'report': int,
-        }
-        """
         # alpha, the step size
-        self.alpha = settings.get('alpha', 0.01)
+        self.alpha = settings['alpha']
         # beta_min, the minimal attraction, must not less than this
-        self.beta_min = settings.get('beta_min', 0.2)
+        self.beta_min = settings['beta_min']
         # beta0, the attraction of two firefly in 0 distance
-        self.beta0 = settings.get('beta0', 1.)
+        self.beta0 = settings['beta0']
         # gamma
-        self.gamma = settings.get('gamma', 1.)
+        self.gamma = settings['gamma']
 
     cdef inline void init(self) nogil:
         """Initial population."""
@@ -92,15 +81,6 @@ cdef class FA(Algorithm):
             me[s] = self.check(s, me[s] + beta * (she[s] - me[s]) + self.alpha
                                * (self.func.ub[s] - self.func.lb[s])
                                * rand_v(-0.5, 0.5))
-
-    cdef inline double check(self, int s, double v) nogil:
-        """Check the bounds."""
-        if v > self.func.ub[s]:
-            return self.func.ub[s]
-        elif v < self.func.lb[s]:
-            return self.func.lb[s]
-        else:
-            return v
 
     cdef inline void generation(self) nogil:
         self.move_fireflies()

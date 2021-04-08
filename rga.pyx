@@ -31,29 +31,18 @@ cdef class RGA(Algorithm):
         object progress_fun=None,
         object interrupt_fun=None
     ):
-        """
-        settings = {
-            'pop_num': int,
-            'cross': float,
-            'mutate': float,
-            'win': float,
-            'delta': float,
-            'max_gen': int or 'min_fit': float or 'max_time': float,
-            'report': int,
-        }
-        """
-        self.cross = settings.get('cross', 0.95)
-        self.mutate_f = settings.get('mutate', 0.05)
-        self.win = settings.get('win', 0.95)
-        self.delta = settings.get('delta', 5.)
+        self.cross = settings['cross']
+        self.mutate_f = settings['mutate']
+        self.win = settings['win']
+        self.delta = settings['delta']
         self.new_fitness = zeros(self.pop_num, dtype=f64)
         self.new_pool = zeros((self.pop_num, self.dim), dtype=f64)
-        self.tmp1 = self.make_tmp()
-        self.tmp2 = self.make_tmp()
-        self.tmp3 = self.make_tmp()
+        self.tmp1 = zeros(self.dim, dtype=f64)
+        self.tmp2 = zeros(self.dim, dtype=f64)
+        self.tmp3 = zeros(self.dim, dtype=f64)
         self.f_tmp = zeros(3, dtype=f64)
 
-    cdef inline double check(self, int i, double v) nogil:
+    cdef inline double bound(self, int i, double v) nogil:
         """If a variable is out of bound, replace it with a random value."""
         if not self.func.ub[i] >= v >= self.func.lb[i]:
             return rand_v(self.func.lb[i], self.func.ub[i])
@@ -72,10 +61,10 @@ cdef class RGA(Algorithm):
                 # first baby, half father half mother
                 self.tmp1[s] = 0.5 * self.pool[i, s] + 0.5 * self.pool[i + 1, s]
                 # second baby, three quarters of father and quarter of mother
-                self.tmp2[s] = self.check(s, 1.5 * self.pool[i, s]
+                self.tmp2[s] = self.bound(s, 1.5 * self.pool[i, s]
                                    - 0.5 * self.pool[i + 1, s])
                 # third baby, quarter of father and three quarters of mother
-                self.tmp3[s] = self.check(s, -0.5 * self.pool[i, s]
+                self.tmp3[s] = self.bound(s, -0.5 * self.pool[i, s]
                                    + 1.5 * self.pool[i + 1, s])
             # evaluate new baby
             self.f_tmp[0] = self.func.fitness(self.tmp1)

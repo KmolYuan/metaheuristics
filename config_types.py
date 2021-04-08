@@ -27,6 +27,12 @@ class RGASetting(Setting):
     delta: float
 
 
+class PSOSetting(Setting):
+    cognition: float
+    social: float
+    velocity: float
+
+
 class FASetting(Setting):
     alpha: float
     beta_min: float

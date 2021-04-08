@@ -11,10 +11,10 @@ email: pyslvs@gmail.com
 """
 
 cimport cython
-from numpy import zeros, uint32 as usize
+from numpy import zeros, uint32 as usize, float64 as f64
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
-ctypedef double (*F)(DE, uint) nogil
+ctypedef double (*Formula)(DE, uint) nogil
 
 
 cpdef enum Strategy:
@@ -37,7 +37,7 @@ cdef class DE(Algorithm):
     cdef double F, CR
     cdef uint[:] v
     cdef double[:] tmp
-    cdef F formula
+    cdef Formula formula
 
     def __cinit__(
         self,
@@ -46,24 +46,14 @@ cdef class DE(Algorithm):
         object progress_fun=None,
         object interrupt_fun=None
     ):
-        """
-        settings = {
-            'strategy': int,
-            'pop_num': int,
-            'F': float,
-            'CR': float,
-            'max_gen': int or 'min_fit': float or 'max_time': float,
-            'report': int,
-        }
-        """
         # strategy 0~9, choice what strategy to generate new member in temporary
-        self.strategy = Strategy(settings.get('strategy', S1))
+        self.strategy = Strategy(settings['strategy'])
         # weight factor F is usually between 0.5 and 1 (in rare cases > 1)
-        self.F = settings.get('F', 0.6)
+        self.F = settings['F']
         if not (0.5 <= self.F <= 1):
             raise ValueError('CR should be [0.5,1]')
         # crossover possible CR in [0,1]
-        self.CR = settings.get('CR', 0.9)
+        self.CR = settings['CR']
         if not (0 <= self.CR <= 1):
             raise ValueError('CR should be [0,1]')
         # the vector
@@ -77,7 +67,7 @@ cdef class DE(Algorithm):
         else:
             num = 5
         self.v = zeros(num, dtype=usize)
-        self.tmp = self.make_tmp()
+        self.tmp = zeros(self.dim, dtype=f64)
         if self.strategy in {S1, S6}:
             self.formula = DE.f1
         elif self.strategy in {S2, S7}:
@@ -149,16 +139,8 @@ cdef class DE(Algorithm):
                     self.tmp[n] = self.formula(self, n)
                 n = (n + 1) % self.dim
 
-    cdef inline bint check(self) nogil:
-        """check the member's chromosome that is out of bound?"""
-        cdef uint i
-        for i in range(self.dim):
-            if not self.func.ub[i] >= self.tmp[i] >= self.func.lb[i]:
-                return True
-        return False
-
     cdef inline void generation(self) nogil:
-        cdef uint i
+        cdef uint i, s
         cdef double tmp_f
         for i in range(self.pop_num):
             # Generate a new vector
@@ -166,11 +148,13 @@ cdef class DE(Algorithm):
             # Use the vector recombine the member to temporary
             self.recombination(i)
             # Check the one is out of bound
-            if self.check():
-                continue
-            # Test
-            tmp_f = self.func.fitness(self.tmp)
-            # Self evolution
-            if tmp_f < self.fitness[i]:
-                self.assign_from(i, tmp_f, self.tmp)
+            for s in range(self.dim):
+                if not self.func.ub[s] >= self.tmp[s] >= self.func.lb[s]:
+                    break
+            else:
+                # Test
+                tmp_f = self.func.fitness(self.tmp)
+                # Self evolution
+                if tmp_f < self.fitness[i]:
+                    self.assign_from(i, tmp_f, self.tmp)
         self.find_best()

@@ -75,8 +75,8 @@ cdef class Algorithm:
             self.stop_at = 1 - settings['slow_down']
         else:
             raise ValueError("please give 'max_gen', 'min_fit' or 'max_time' limit")
-        self.pop_num = settings.get('pop_num', 500)
-        self.rpt = settings.get('report', 0)
+        self.pop_num = settings['pop_num']
+        self.rpt = settings['report']
         if self.rpt <= 0:
             self.rpt = 10
         self.parallel = settings.get('parallel', False)
@@ -93,10 +93,6 @@ cdef class Algorithm:
         self.func.gen = 0
         self.time_start = 0
         self.reports = clist[Report]()
-
-    cdef double[:] make_tmp(self):
-        """Make new chromosome."""
-        return zeros(self.dim, dtype=f64)
 
     cdef void assign(self, uint i, uint j) nogil:
         """Copy value from j to i."""
@@ -146,6 +142,15 @@ cdef class Algorithm:
         """The process of each generation."""
         with gil:
             raise NotImplementedError
+
+    cdef double check(self, int s, double v) nogil:
+        """Check the bounds."""
+        if v > self.func.ub[s]:
+            return self.func.ub[s]
+        elif v < self.func.lb[s]:
+            return self.func.lb[s]
+        else:
+            return v
 
     cdef inline void report(self) nogil:
         """Report generation, fitness and time."""

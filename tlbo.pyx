@@ -12,6 +12,7 @@ email: pyslvs@gmail.com
 
 cimport cython
 from libc.math cimport round
+from numpy import zeros, float64 as f64
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
 
@@ -27,14 +28,7 @@ cdef class TLBO(Algorithm):
         object progress_fun=None,
         object interrupt_fun=None
     ):
-        """
-        settings = {
-            'pop_num': int,
-            'max_gen': int or 'min_fit': float or 'max_time': float,
-            'report': int,
-        }
-        """
-        self.tmp = self.make_tmp()
+        self.tmp = zeros(self.dim, dtype=f64)
 
     cdef inline void init(self) nogil:
         """Initial population: Sorted students."""

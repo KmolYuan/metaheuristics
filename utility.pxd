@@ -52,7 +52,6 @@ cdef class Algorithm:
     cdef public ObjFunc func
 
     # Chromosome
-    cdef double[:] make_tmp(self)
     cdef void assign(self, uint i, uint j) nogil
     cdef void assign_from(self, uint i, double f, double[:] v) nogil
     cdef void set_best(self, uint i) nogil
@@ -61,6 +60,7 @@ cdef class Algorithm:
     cdef void init_pop(self) nogil
     cdef void init(self) nogil
     cdef void generation(self) nogil
+    cdef double check(self, int s, double v) nogil
     cdef void report(self) nogil
     cpdef double[:, :] history(self)
     cpdef tuple result(self)

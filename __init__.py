@@ -14,8 +14,9 @@ from .config_types import (
     Setting, DESetting, FASetting, RGASetting, TOBLSetting,
 )
 from .rga import RGA
-from .fa import FA
 from .de import DE
+from .pso import PSO
+from .fa import FA
 from .tlbo import TLBO
 
 
@@ -23,15 +24,17 @@ from .tlbo import TLBO
 class AlgorithmType(str, Enum):
     """Enum type of algorithms."""
     RGA = "Real-coded Genetic Algorithm"
-    FA = "Firefly Algorithm"
     DE = "Differential Evolution"
+    PSO = "Particle Swarm Optimization"
+    FA = "Firefly Algorithm"
     TLBO = "Teaching Learning Based Optimization"
 
 
 _ALGORITHM: Mapping[AlgorithmType, Type[Algorithm]] = {
     AlgorithmType.RGA: RGA,
-    AlgorithmType.FA: FA,
     AlgorithmType.DE: DE,
+    AlgorithmType.PSO: PSO,
+    AlgorithmType.FA: FA,
     AlgorithmType.TLBO: TLBO,
 }
 _DEFAULT_PARAMS = {'max_gen': 1000, 'report': 50}
@@ -43,18 +46,24 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
         'win': 0.95,
         'delta': 5.,
     },
+    AlgorithmType.DE: {
+        'strategy': 1,
+        'pop_num': 400,
+        'F': 0.6,
+        'CR': 0.9,
+    },
+    AlgorithmType.PSO: {
+        'pop_num': 200,
+        'cognition': 2.05,
+        'social': 2.05,
+        'velocity': 1.3,
+    },
     AlgorithmType.FA: {
         'pop_num': 80,
         'alpha': 0.01,
         'beta_min': 0.2,
         'gamma': 1.,
         'beta0': 1.,
-    },
-    AlgorithmType.DE: {
-        'strategy': 1,
-        'pop_num': 400,
-        'F': 0.6,
-        'CR': 0.9,
     },
     AlgorithmType.TLBO: {
         'pop_num': 50,
