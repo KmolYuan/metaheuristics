@@ -12,7 +12,7 @@ email: pyslvs@gmail.com
 
 cimport cython
 from cython.parallel cimport prange
-from libc.math cimport exp, sqrt
+from libc.math cimport exp
 from .utility cimport uint, rand_v, ObjFunc, Algorithm
 
 
@@ -24,7 +24,7 @@ cdef double _distance(double[:] me, double[:] she, uint dim) nogil:
     for i in range(dim):
         diff = me[i] - she[i]
         dist += diff * diff
-    return sqrt(dist)
+    return dist
 
 
 @cython.final
@@ -75,7 +75,7 @@ cdef class FA(Algorithm):
         """Move single firefly."""
         cdef double r = _distance(me, she, self.dim)
         cdef double beta = ((self.beta0 - self.beta_min)
-                            * exp(-self.gamma * r * r) + self.beta_min)
+                            * exp(-self.gamma * r) + self.beta_min)
         cdef uint s
         for s in range(self.dim):
             me[s] = self.check(s, me[s] + beta * (she[s] - me[s]) + self.alpha
