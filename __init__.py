@@ -47,10 +47,10 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
         'delta': 5.,
     },
     AlgorithmType.DE: {
-        'strategy': 1,
         'pop_num': 400,
-        'F': 0.6,
-        'CR': 0.9,
+        'strategy': 1,
+        'f': 0.6,
+        'cr': 0.9,
     },
     AlgorithmType.PSO: {
         'pop_num': 200,

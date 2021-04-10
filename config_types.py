@@ -16,8 +16,8 @@ class Setting(TypedDict, total=False):
 
 class DESetting(Setting):
     strategy: Strategy
-    F: float
-    CR: float
+    f: float
+    cr: float
 
 
 class RGASetting(Setting):

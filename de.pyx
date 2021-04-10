@@ -14,8 +14,6 @@ cimport cython
 from numpy import zeros, uint32 as usize, float64 as f64
 from .utility cimport uint, rand_v, rand_i, ObjFunc, Algorithm
 
-ctypedef double (*Formula)(DE, uint) nogil
-
 
 cpdef enum Strategy:
     S1
@@ -34,10 +32,11 @@ cpdef enum Strategy:
 cdef class DE(Algorithm):
     """The implementation of Differential Evolution."""
     cdef Strategy strategy
-    cdef double F, CR
+    cdef double f, cr
     cdef uint[:] v
     cdef double[:] tmp
-    cdef Formula formula
+    cdef (double (*)(DE, uint) nogil) formula
+    cdef (void (*)(DE, uint) nogil) setter
 
     def __cinit__(
         self,
@@ -48,14 +47,14 @@ cdef class DE(Algorithm):
     ):
         # strategy 0~9, choice what strategy to generate new member in temporary
         self.strategy = Strategy(settings['strategy'])
-        # weight factor F is usually between 0.5 and 1 (in rare cases > 1)
-        self.F = settings['F']
-        if not (0.5 <= self.F <= 1):
-            raise ValueError('CR should be [0.5,1]')
-        # crossover possible CR in [0,1]
-        self.CR = settings['CR']
-        if not (0 <= self.CR <= 1):
-            raise ValueError('CR should be [0,1]')
+        # weight factor f is usually between 0.5 and 1 (in rare cases > 1)
+        self.f = settings['f']
+        if 0.5 > self.f or self.f > 1:
+            raise ValueError('cr should be [0.5,1]')
+        # crossover possible cr in [0,1]
+        self.cr = settings['cr']
+        if 0 > self.cr or self.cr > 1:
+            raise ValueError('cr should be [0,1]')
         # the vector
         cdef uint num
         if self.strategy in {S1, S3, S6, S8}:
@@ -78,6 +77,10 @@ cdef class DE(Algorithm):
             self.formula = DE.f4
         else:
             self.formula = DE.f5
+        if self.strategy in {S1, S2, S3, S4, S5}:
+            self.setter = DE.s1
+        else:
+            self.setter = DE.s2
 
     cdef inline void init(self) nogil:
         """Initial population."""
@@ -99,45 +102,45 @@ cdef class DE(Algorithm):
                 self.v[j] = rand_i(self.pop_num)
 
     cdef double f1(self, uint n) nogil:
-        return self.best[n] + self.F * (
+        return self.best[n] + self.f * (
             self.pool[self.v[0], n] - self.pool[self.v[1], n])
 
     cdef double f2(self, uint n) nogil:
-        return self.pool[self.v[0], n] + self.F * (
+        return self.pool[self.v[0], n] + self.f * (
             self.pool[self.v[1], n] - self.pool[self.v[2], n])
 
     cdef double f3(self, uint n) nogil:
-        return self.tmp[n] + self.F * (self.best[n] - self.tmp[n]
+        return self.tmp[n] + self.f * (self.best[n] - self.tmp[n]
             + self.pool[self.v[0], n] - self.pool[self.v[1], n])
 
     cdef double f4(self, uint n) nogil:
-        return self.best[n] + self.F * (
+        return self.best[n] + self.f * (
             self.pool[self.v[0], n] + self.pool[self.v[1], n]
             - self.pool[self.v[2], n] - self.pool[self.v[3], n])
 
     cdef double f5(self, uint n) nogil:
-        return self.pool[self.v[4], n] + self.F * (
+        return self.pool[self.v[4], n] + self.f * (
             self.pool[self.v[0], n] + self.pool[self.v[1], n]
             - self.pool[self.v[2], n] - self.pool[self.v[3], n])
+
+    cdef void s1(self, uint n) nogil:
+        for _ in range(self.dim):
+            self.tmp[n] = self.formula(self, n)
+            n = (n + 1) % self.dim
+            if rand_v() >= self.cr:
+                break
+
+    cdef void s2(self, uint n) nogil:
+        cdef uint l_v
+        for l_v in range(self.dim):
+            if rand_v() < self.cr or l_v == self.dim - 1:
+                self.tmp[n] = self.formula(self, n)
+            n = (n + 1) % self.dim
 
     cdef inline void recombination(self, int i) nogil:
         """use new vector, recombination the new one member to tmp."""
         self.tmp[:] = self.pool[i, :]
-        cdef uint n = rand_i(self.dim)
-        cdef uint l_v
-        if self.strategy in {S1, S2, S3, S4, S5}:
-            l_v = 0
-            while True:
-                self.tmp[n] = self.formula(self, n)
-                n = (n + 1) % self.dim
-                l_v += 1
-                if rand_v() >= self.CR or l_v >= self.dim:
-                    break
-        else:
-            for l_v in range(self.dim):
-                if rand_v() < self.CR or l_v == self.dim - 1:
-                    self.tmp[n] = self.formula(self, n)
-                n = (n + 1) % self.dim
+        self.setter(self, rand_i(self.dim))
 
     cdef inline void generation(self) nogil:
         cdef uint i, s

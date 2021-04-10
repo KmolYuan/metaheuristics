@@ -21,8 +21,8 @@ from .utility cimport uint, MAX_GEN, rand_v, rand_i, ObjFunc, Algorithm
 cdef class RGA(Algorithm):
     """The implementation of Real-coded Genetic Algorithm."""
     cdef double cross, mutate_f, win, delta
-    cdef double[:] new_fitness, tmp1, tmp2, tmp3, f_tmp
-    cdef double[:, :] new_pool
+    cdef double[:] new_fitness, f_tmp
+    cdef double[:, :] new_pool, tmp
 
     def __cinit__(
         self,
@@ -37,9 +37,7 @@ cdef class RGA(Algorithm):
         self.delta = settings['delta']
         self.new_fitness = zeros(self.pop_num, dtype=f64)
         self.new_pool = zeros((self.pop_num, self.dim), dtype=f64)
-        self.tmp1 = zeros(self.dim, dtype=f64)
-        self.tmp2 = zeros(self.dim, dtype=f64)
-        self.tmp3 = zeros(self.dim, dtype=f64)
+        self.tmp = zeros((3, self.dim), dtype=f64)
         self.f_tmp = zeros(3, dtype=f64)
 
     cdef inline double bound(self, int i, double v) nogil:
@@ -59,30 +57,30 @@ cdef class RGA(Algorithm):
                 continue
             for s in range(self.dim):
                 # first baby, half father half mother
-                self.tmp1[s] = 0.5 * self.pool[i, s] + 0.5 * self.pool[i + 1, s]
+                self.tmp[0, s] = 0.5 * (self.pool[i, s] + self.pool[i + 1, s])
                 # second baby, three quarters of father and quarter of mother
-                self.tmp2[s] = self.bound(s, 1.5 * self.pool[i, s]
-                                   - 0.5 * self.pool[i + 1, s])
+                self.tmp[1, s] = self.bound(s, 1.5 * self.pool[i, s]
+                                            - 0.5 * self.pool[i + 1, s])
                 # third baby, quarter of father and three quarters of mother
-                self.tmp3[s] = self.bound(s, -0.5 * self.pool[i, s]
-                                   + 1.5 * self.pool[i + 1, s])
+                self.tmp[2, s] = self.bound(s, -0.5 * self.pool[i, s]
+                                            + 1.5 * self.pool[i + 1, s])
             # evaluate new baby
-            self.f_tmp[0] = self.func.fitness(self.tmp1)
-            self.f_tmp[1] = self.func.fitness(self.tmp2)
-            self.f_tmp[2] = self.func.fitness(self.tmp3)
+            self.f_tmp[0] = self.func.fitness(self.tmp[0, :])
+            self.f_tmp[1] = self.func.fitness(self.tmp[1, :])
+            self.f_tmp[2] = self.func.fitness(self.tmp[2, :])
             # bubble sort: smaller -> larger
             if self.f_tmp[0] > self.f_tmp[1]:
                 self.f_tmp[0], self.f_tmp[1] = self.f_tmp[1], self.f_tmp[0]
-                self.tmp1, self.tmp2 = self.tmp2, self.tmp1
+                self.tmp[0], self.tmp[1] = self.tmp[1], self.tmp[0]
             if self.f_tmp[0] > self.f_tmp[2]:
                 self.f_tmp[0], self.f_tmp[2] = self.f_tmp[2], self.f_tmp[0]
-                self.tmp1, self.tmp3 = self.tmp3, self.tmp1
+                self.tmp[0], self.tmp[2] = self.tmp[2], self.tmp[0]
             if self.f_tmp[1] > self.f_tmp[2]:
                 self.f_tmp[1], self.f_tmp[2] = self.f_tmp[2], self.f_tmp[1]
-                self.tmp2, self.tmp3 = self.tmp3, self.tmp2
+                self.tmp[1], self.tmp[2] = self.tmp[2], self.tmp[1]
             # replace first two baby to parent, another one will be
-            self.assign_from(i, self.f_tmp[0], self.tmp1)
-            self.assign_from(i + 1, self.f_tmp[1], self.tmp2)
+            self.assign_from(i, self.f_tmp[0], self.tmp[0])
+            self.assign_from(i + 1, self.f_tmp[1], self.tmp[1])
 
     cdef inline double get_delta(self, double y) nogil:
         cdef double r
@@ -128,7 +126,8 @@ cdef class RGA(Algorithm):
         # now replace origin chromosome
         self.fitness[:] = self.new_fitness
         self.pool[:] = self.new_pool
-        # select random one chromosome to be best chromosome, make best chromosome still exist
+        # select random one chromosome to be best chromosome,
+        # make best chromosome still exist
         self.assign_from(rand_i(self.pop_num), self.best_f, self.best)
 
     cdef inline void generation(self) nogil:
