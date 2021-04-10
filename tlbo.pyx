@@ -30,11 +30,6 @@ cdef class TLBO(Algorithm):
     ):
         self.tmp = zeros(self.dim, dtype=f64)
 
-    cdef inline void init(self) nogil:
-        """Initial population: Sorted students."""
-        self.init_pop()
-        self.find_best()
-
     cdef inline void bounding(self, uint s) nogil:
         if self.tmp[s] < self.func.lb[s]:
             self.tmp[s] = self.func.lb[s]

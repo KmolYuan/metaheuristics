@@ -36,10 +36,8 @@ cdef class PSO(Algorithm):
 
     cdef inline void init(self) nogil:
         """Initial population."""
-        self.init_pop()
         self.best_past[:, :] = self.pool
         self.best_f_past[:] = self.fitness
-        self.find_best()
 
     cdef inline void generation(self) nogil:
         cdef double alpha

@@ -12,7 +12,6 @@ email: pyslvs@gmail.com
 """
 
 from numpy import array, zeros, float64 as f64
-from cython.parallel cimport prange
 from libc.math cimport HUGE_VAL
 from libc.stdlib cimport rand, srand, RAND_MAX
 from libc.time cimport time, difftime
@@ -79,7 +78,6 @@ cdef class Algorithm:
         self.rpt = settings['report']
         if self.rpt <= 0:
             self.rpt = 10
-        self.parallel = settings.get('parallel', False)
         self.progress_fun = progress_fun
         self.interrupt_fun = interrupt_fun
         self.dim = len(self.func.ub)
@@ -121,22 +119,20 @@ cdef class Algorithm:
 
     cdef void init_pop(self) nogil:
         """Initialize population."""
+        cdef uint best = 0
         cdef uint i, s
-        if self.parallel:
-            for i in prange(self.pop_num):
-                for s in range(self.dim):
-                    self.pool[i, s] = rand_v(self.func.lb[s], self.func.ub[s])
-                self.fitness[i] = self.func.fitness(self.pool[i, :])
-        else:
-            for i in range(self.pop_num):
-                for s in range(self.dim):
-                    self.pool[i, s] = rand_v(self.func.lb[s], self.func.ub[s])
-                self.fitness[i] = self.func.fitness(self.pool[i, :])
+        for i in range(self.pop_num):
+            for s in range(self.dim):
+                self.pool[i, s] = rand_v(self.func.lb[s], self.func.ub[s])
+            self.fitness[i] = self.func.fitness(self.pool[i, :])
+            if self.fitness[i] < self.fitness[best]:
+                best = i
+        if self.fitness[best] < self.best_f:
+            self.set_best(best)
 
     cdef void init(self) nogil:
         """Initialize function."""
-        with gil:
-            raise NotImplementedError
+        pass
 
     cdef void generation(self) nogil:
         """The process of each generation."""
@@ -193,6 +189,7 @@ cdef class Algorithm:
                 self.func.ub[i], self.func.lb[i] = self.func.lb[i], self.func.ub[i]
         # Start
         self.time_start = time(NULL)
+        self.init_pop()
         self.init()
         self.report()
         # Iterations

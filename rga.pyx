@@ -11,7 +11,6 @@ email: pyslvs@gmail.com
 """
 
 cimport cython
-from cython.parallel cimport parallel
 from libc.math cimport pow
 from numpy import zeros, float64 as f64
 from .utility cimport uint, MAX_GEN, rand_v, rand_i, ObjFunc, Algorithm
@@ -45,10 +44,6 @@ cdef class RGA(Algorithm):
         if not self.func.ub[i] >= v >= self.func.lb[i]:
             return rand_v(self.func.lb[i], self.func.ub[i])
         return v
-
-    cdef inline void init(self) nogil:
-        self.init_pop()
-        self.set_best(0)
 
     cdef inline void crossover(self) nogil:
         cdef uint i, s
@@ -103,11 +98,7 @@ cdef class RGA(Algorithm):
                 self.pool[i, s] -= self.get_delta(self.pool[i, s]
                                                   - self.func.lb[s])
             # Get fitness
-            if self.parallel:
-                with parallel():
-                    self.fitness[i] = self.func.fitness(self.pool[i, :])
-            else:
-                self.fitness[i] = self.func.fitness(self.pool[i, :])
+            self.fitness[i] = self.func.fitness(self.pool[i, :])
         self.find_best()
 
     cdef inline void select(self) nogil:

@@ -11,7 +11,6 @@ email: pyslvs@gmail.com
 """
 
 cimport cython
-from cython.parallel cimport prange
 from libc.math cimport exp
 from .utility cimport uint, rand_v, ObjFunc, Algorithm
 
@@ -48,11 +47,6 @@ cdef class FA(Algorithm):
         # gamma
         self.gamma = settings['gamma']
 
-    cdef inline void init(self) nogil:
-        """Initial population."""
-        self.init_pop()
-        self.set_best(0)
-
     cdef inline void move_fireflies(self) nogil:
         """Move fireflies."""
         cdef bint is_move
@@ -86,10 +80,6 @@ cdef class FA(Algorithm):
         self.move_fireflies()
         # Get fitness
         cdef uint i
-        if self.parallel:
-            for i in prange(self.pop_num):
-                self.fitness[i] = self.func.fitness(self.pool[i, :])
-        else:
-            for i in range(self.pop_num):
-                self.fitness[i] = self.func.fitness(self.pool[i, :])
+        for i in range(self.pop_num):
+            self.fitness[i] = self.func.fitness(self.pool[i, :])
         self.find_best()
