@@ -11,9 +11,3 @@ class TestObj(ObjFunc[float]):
 
     def result(self, v: ndarray) -> float:
         ...
-
-def with_mp() -> None:
-    ...
-
-def without_mp() -> None:
-    ...
