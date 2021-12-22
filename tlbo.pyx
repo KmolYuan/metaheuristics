@@ -41,7 +41,7 @@ cdef class TLBO(Algorithm):
         if f_new < self.fitness[i]:
             self.pool[i, :] = self.tmp
             self.fitness[i] = f_new
-        if self.fitness[i] < self.best_f:
+        if f_new < self.best_f:
             self.set_best(i)
 
     cdef inline void teaching(self, uint i) nogil:
@@ -54,8 +54,7 @@ cdef class TLBO(Algorithm):
             for j in range(self.pop_num):
                 mean += self.pool[j, s]
             mean /= self.dim
-            self.tmp[s] = self.pool[i, s] + rand_v(1, self.dim) * (
-                self.best[s] - tf * mean)
+            self.tmp[s] = self.pool[i, s] + rand_v(1, self.dim) * (self.best[s] - tf * mean)
             self.bounding(s)
         self.register(i)
 

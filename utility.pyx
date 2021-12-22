@@ -205,7 +205,7 @@ cdef class Algorithm:
                 if self.func.gen >= self.stop_at > 0:
                     break
             elif self.task == MIN_FIT:
-                if self.best_f <= self.stop_at:
+                if self.best_f < self.stop_at:
                     break
             elif self.task == MAX_TIME:
                 if difftime(time(NULL), self.time_start) >= self.stop_at > 0:
