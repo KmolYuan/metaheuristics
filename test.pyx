@@ -24,7 +24,7 @@ cdef class TestObj(ObjFunc):
 
     def __cinit__(self):
         self.ub = array([50] * 4, dtype=f64)
-        self.lb = array([0] * 4, dtype=f64)
+        self.lb = array([-50] * 4, dtype=f64)
 
     cdef double target(self, double[:] v) nogil:
         return v[0] * v[0] + 8 * v[1] * v[1] + v[2] * v[2] + v[3] * v[3]

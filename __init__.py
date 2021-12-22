@@ -60,10 +60,9 @@ _PARAMS: Mapping[AlgorithmType, Dict[str, Union[int, float]]] = {
     },
     AlgorithmType.FA: {
         'pop_num': 80,
-        'alpha': 0.01,
-        'beta_min': 0.2,
-        'gamma': 1.,
-        'beta0': 1.,
+        'alpha': 1.,
+        'beta_min': 1.,
+        'gamma': 0.01,
     },
     AlgorithmType.TLBO: {
         'pop_num': 50,
