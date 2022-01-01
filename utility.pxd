@@ -5,7 +5,7 @@
 The 'utility' module should be loaded when using sub-class.
 
 author: Yuan Chang
-copyright: Copyright (C) 2016-2021
+copyright: Copyright (C) 2016-2022
 license: AGPL
 email: pyslvs@gmail.com
 """

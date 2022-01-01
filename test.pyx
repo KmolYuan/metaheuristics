@@ -5,7 +5,7 @@
 """Test objective function for algorithms.
 
 author: Yuan Chang
-copyright: Copyright (C) 2016-2021
+copyright: Copyright (C) 2016-2022
 license: AGPL
 email: pyslvs@gmail.com
 """
